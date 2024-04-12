@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataLotto admin page</title>
+    <script>
+        let adminToken = ""
+        const setAdminToken = ()=>{
+            adminToken = document.getElementById("admintoken").value
+            console.log(adminToken)
+        }
+        const drawWinner = ()=>{
+            fetch("api/admin/draw?adminKey="+adminToken).then(res=>{
+                if(res.status===200)res.text().then(t=>{
+                    document.getElementById("winner").innerHTML="<h2>"+t+"</h2>"
+                })
+                    else document.getElementById("winner").innerHTML="<h2>ERROR</h2>"
+            })
+        }
+        const reset = ()=>{
+            fetch("api/admin/reset?adminKey="+adminToken,{method: "POST"}).then(res=>{
+                if(res.status===200)alert("Datasets reset")
+                else alert("Error resetting datasets")
+            })
+        }
+        const deleteSet = ()=>{
+            let id = document.getElementById("setId").value
+            fetch("api/admin/delete/"+id+"?adminKey="+adminToken,{method: "DELETE"}).then(res=>{
+                if(res.status===200)alert("Deleted dataset "+id)
+                else alert("Error deleting dataset "+id)
+            })
+        }
+        const setCooldown = ()=>{
+            let cooldown = document.getElementById("setCooldown").value
+            fetch("api/admin/cooldown/?adminKey="+adminToken,{method: "POST", body: JSON.stringify({cooldown:cooldown}),headers: {
+                    "Content-Type": "application/json"
+                }}).then(res=>{
+                if(res.status===200)alert("Set cooldown to "+cooldown)
+                else alert("Error setting cooldown to "+cooldown)
+            })
+        }
+    </script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh; /* Set body and html to 100 viewport height */
+        }
+
+        .container {
+            display: flex;
+            height: 100%; /* Inherit height from body/html */
+        }
+
+        .responsive-iframe {
+            flex: 1; /* Allow iframe to fill remaining space */
+            width: 100%; /* Ensure it fills the width available */
+            border: none; /* Remove any default border from the iframe */
+        }
+    </style>
+</head>
+<body>
+<h1>Admin panel</h1>
+<div><label for="admintoken" >Admin token:</label></div>
+
+<div><input type="password" id="admintoken" name="admintoken" onchange="setAdminToken()"></div>
+
+<button onclick="reset()">Reset Datasets</button>
+<div>
+    <button onclick="drawWinner()">Draw Winner</button>
+    <div id="winner"></div>
+</div>
+<div>
+    <label for="setId">ID:</label>
+    <input id="setId" name="setId">
+    <button onclick="deleteSet()">Delete Set</button>
+</div>
+<div>
+    <label for="setCooldown">Cooldown:</label>
+    <input id="setCooldown" name="setCooldown">
+    <button onclick="setCooldown()">Set Cooldown</button>
+</div>
+<div class="container">
+    <iframe src="/" class="responsive-iframe"></iframe>
+</div>
+</body>
+</html>
